@@ -1,0 +1,34 @@
+# Dataset mínimo para medir calidad del retrieve (sin LLM).
+# Métricas: source_hit@k, keyword_hit@k
+version: 1
+description: FAQ Esteban Creaciones — retrieve quality smoke set
+cases:
+  - id: plazos_centro_mesa
+    query: cuanto tarda un centro de mesa
+    expected_source_ids: [plazos]
+    expected_keywords: ["10", "centro"]
+
+  - id: plazos_carpeta
+    query: en cuantos dias entregan una carpeta creativa
+    expected_source_ids: [plazos]
+    expected_keywords: ["7", "carpeta"]
+
+  - id: plazos_disfraz
+    query: cuanto tiempo necesita un disfraz a medida
+    expected_source_ids: [plazos]
+    expected_keywords: ["14", "disfraz"]
+
+  - id: productos_que_hacen
+    query: que trabajos o productos ofrecen
+    expected_source_ids: [productos]
+    expected_keywords: ["carpetas", "centros", "disfraces"]
+
+  - id: entrega_zona
+    query: en que zona entregan o se puede retirar
+    expected_source_ids: [entrega]
+    expected_keywords: ["retiro", "zona"]
+
+  - id: precios_orientativos
+    query: como funcionan los precios y la cotizacion
+    expected_source_ids: [precios]
+    expected_keywords: ["cotiz", "precio"]

@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: esteban-postgres
+    environment:
+      POSTGRES_USER: esteban
+      POSTGRES_PASSWORD: esteban
+      POSTGRES_DB: esteban_creaciones
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/scripts/init_db.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U esteban -d esteban_creaciones"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Jaeger all-in-one — UI gratis en :16686, OTLP gRPC :4317 / HTTP :4318
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: esteban-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: esteban-api
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://esteban:esteban@postgres:5432/esteban_creaciones
+      OTEL_ENABLED: "true"
+      OTEL_EXPORTER: otlp
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - model_cache:/root/.cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+      jaeger:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  model_cache:
